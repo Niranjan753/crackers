@@ -14,6 +14,7 @@ import {
   ProductWithNestedCategory,
   CategoryResponse
 } from '@/lib/productService';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 interface DatabaseError {
   message: string;
@@ -194,196 +195,198 @@ export default function Dashboard() {
   </div>;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <h1 className="text-3xl font-bold mb-8">Product Management Dashboard</h1>
-      
-      <div className="mb-6">
-        <button 
-          onClick={() => setActiveTab('products')}
-          className={`mr-4 px-4 py-2 rounded ${activeTab === 'products' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        >
-          Products
-        </button>
-        <button 
-          onClick={() => setActiveTab('categories')}
-          className={`px-4 py-2 rounded ${activeTab === 'categories' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        >
-          Categories
-        </button>
-      </div>
+    <ProtectedRoute>
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <h1 className="text-3xl font-bold mb-8">Product Management Dashboard</h1>
+        
+        <div className="mb-6">
+          <button 
+            onClick={() => setActiveTab('products')}
+            className={`mr-4 px-4 py-2 rounded ${activeTab === 'products' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          >
+            Products
+          </button>
+          <button 
+            onClick={() => setActiveTab('categories')}
+            className={`px-4 py-2 rounded ${activeTab === 'categories' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          >
+            Categories
+          </button>
+        </div>
 
-      {activeTab === 'products' && (
-        <div>
-          <div className="bg-white rounded-lg shadow-lg p-4 mb-8">
-            <h2 className="text-xl font-semibold mb-4">Products List</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {products.map(product => (
-                    <tr key={product.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-2 whitespace-nowrap">
-                        <input
-                          type="text"
-                          value={product.name}
-                          onChange={e => setProducts(products.map(p => 
-                            p.id === product.id ? { ...p, name: e.target.value } : p
-                          ))}
-                          className="border rounded px-2 py-1 w-full text-sm"
-                        />
-                      </td>
-                      <td className="px-4 py-2 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <input
-                            type="number"
-                            value={product.price}
-                            onChange={e => {
-                              const newPrice = Number(e.target.value);
-                              setProducts(products.map(p => 
-                                p.id === product.id ? { ...p, price: newPrice } : p
-                              ));
-                            }}
-                            className="border rounded px-2 py-1 w-20 text-sm"
-                            min="0"
-                            step="1"
-                          />
-                          <span className="ml-1 text-gray-500 text-sm">₹</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-2 whitespace-nowrap">
-                        <select
-                          value={product.category_id || ''}
-                          onChange={e => setProducts(products.map(p => 
-                            p.id === product.id ? { ...p, category_id: e.target.value } : p
-                          ))}
-                          className="border rounded px-2 py-1 text-sm w-32"
-                        >
-                          <option value="">Select Category</option>
-                          {categories.map(category => (
-                            <option key={category.id} value={category.id}>
-                              {category.name}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="px-4 py-2 whitespace-nowrap">
-                        <select
-                          value={product.stock_status || 'in_stock'}
-                          onChange={e => setProducts(products.map(p => 
-                            p.id === product.id ? { ...p, stock_status: e.target.value as 'in_stock' | 'out_of_stock' } : p
-                          ))}
-                          className="border rounded px-2 py-1 text-sm w-28"
-                        >
-                          <option value="in_stock">In Stock</option>
-                          <option value="out_of_stock">Out of Stock</option>
-                        </select>
-                      </td>
-                      <td className="px-4 py-2 whitespace-nowrap space-x-2">
-                        <button
-                          onClick={() => handleUpdateProduct(product)}
-                          className="px-2 py-1 text-xs font-medium text-white bg-blue-500 rounded hover:bg-blue-600"
-                        >
-                          Update
-                        </button>
-                        <button
-                          onClick={() => toggleVisibility(product)}
-                          className={`p-1.5 rounded ${product.is_visible ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}
-                        >
-                          {product.is_visible ? <FaEye /> : <FaEyeSlash />}
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(product.id)}
-                          className="p-1.5 text-red-600 hover:text-red-900 rounded hover:bg-red-50"
-                        >
-                          <FaTrash />
-                        </button>
-                      </td>
+        {activeTab === 'products' && (
+          <div>
+            <div className="bg-white rounded-lg shadow-lg p-4 mb-8">
+              <h2 className="text-xl font-semibold mb-4">Products List</h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {products.map(product => (
+                      <tr key={product.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 whitespace-nowrap">
+                          <input
+                            type="text"
+                            value={product.name}
+                            onChange={e => setProducts(products.map(p => 
+                              p.id === product.id ? { ...p, name: e.target.value } : p
+                            ))}
+                            className="border rounded px-2 py-1 w-full text-sm"
+                          />
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <input
+                              type="number"
+                              value={product.price}
+                              onChange={e => {
+                                const newPrice = Number(e.target.value);
+                                setProducts(products.map(p => 
+                                  p.id === product.id ? { ...p, price: newPrice } : p
+                                ));
+                              }}
+                              className="border rounded px-2 py-1 w-20 text-sm"
+                              min="0"
+                              step="1"
+                            />
+                            <span className="ml-1 text-gray-500 text-sm">₹</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap">
+                          <select
+                            value={product.category_id || ''}
+                            onChange={e => setProducts(products.map(p => 
+                              p.id === product.id ? { ...p, category_id: e.target.value } : p
+                            ))}
+                            className="border rounded px-2 py-1 text-sm w-32"
+                          >
+                            <option value="">Select Category</option>
+                            {categories.map(category => (
+                              <option key={category.id} value={category.id}>
+                                {category.name}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap">
+                          <select
+                            value={product.stock_status || 'in_stock'}
+                            onChange={e => setProducts(products.map(p => 
+                              p.id === product.id ? { ...p, stock_status: e.target.value as 'in_stock' | 'out_of_stock' } : p
+                            ))}
+                            className="border rounded px-2 py-1 text-sm w-28"
+                          >
+                            <option value="in_stock">In Stock</option>
+                            <option value="out_of_stock">Out of Stock</option>
+                          </select>
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap space-x-2">
+                          <button
+                            onClick={() => handleUpdateProduct(product)}
+                            className="px-2 py-1 text-xs font-medium text-white bg-blue-500 rounded hover:bg-blue-600"
+                          >
+                            Update
+                          </button>
+                          <button
+                            onClick={() => toggleVisibility(product)}
+                            className={`p-1.5 rounded ${product.is_visible ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}
+                          >
+                            {product.is_visible ? <FaEye /> : <FaEyeSlash />}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProduct(product.id)}
+                            className="p-1.5 text-red-600 hover:text-red-900 rounded hover:bg-red-50"
+                          >
+                            <FaTrash />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Add New Product</h2>
-            <form onSubmit={handleAddProduct} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Add New Product</h2>
+              <form onSubmit={handleAddProduct} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Product Name</label>
+                    <input
+                      type="text"
+                      value={newProduct.name}
+                      onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
+                      className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Price</label>
+                    <input
+                      type="number"
+                      value={newProduct.price}
+                      onChange={e => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
+                      className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3"
+                      required
+                    />
+                  </div>
+                </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Product Name</label>
+                  <label className="block text-sm font-medium text-gray-700">Description</label>
+                  <textarea
+                    value={newProduct.description}
+                    onChange={e => setNewProduct({ ...newProduct, description: e.target.value })}
+                    className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Category</label>
+                  <select
+                    value={newProduct.category_id || ''}
+                    onChange={e => setNewProduct({ ...newProduct, category_id: e.target.value })}
+                    className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3"
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map(category => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Image URL</label>
                   <input
                     type="text"
-                    value={newProduct.name}
-                    onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
+                    value={newProduct.image_url}
+                    onChange={e => setNewProduct({ ...newProduct, image_url: e.target.value })}
                     className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3"
-                    required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Price</label>
-                  <input
-                    type="number"
-                    value={newProduct.price}
-                    onChange={e => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
-                    className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3"
-                    required
-                  />
+                  <button
+                    type="submit"
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  >
+                    Add Product
+                  </button>
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
-                <textarea
-                  value={newProduct.description}
-                  onChange={e => setNewProduct({ ...newProduct, description: e.target.value })}
-                  className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3"
-                  rows={3}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Category</label>
-                <select
-                  value={newProduct.category_id || ''}
-                  onChange={e => setNewProduct({ ...newProduct, category_id: e.target.value })}
-                  className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3"
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {categories.map(category => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Image URL</label>
-                <input
-                  type="text"
-                  value={newProduct.image_url}
-                  onChange={e => setNewProduct({ ...newProduct, image_url: e.target.value })}
-                  className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3"
-                />
-              </div>
-              <div>
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                >
-                  Add Product
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }
