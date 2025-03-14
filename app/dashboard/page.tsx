@@ -144,9 +144,26 @@ export default function Dashboard() {
     try {
       const updatedProduct = {
         ...product,
-        is_visible: !product.is_visible
+        is_visible: !product.is_visible,
+        updated_at: new Date().toISOString()
       };
-      await handleUpdateProduct(updatedProduct);
+
+      const { error } = await supabase
+        .from('products')
+        .update({
+          is_visible: updatedProduct.is_visible,
+          updated_at: updatedProduct.updated_at
+        })
+        .eq('id', product.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setProducts(products.map(p => 
+        p.id === product.id ? {...p, is_visible: updatedProduct.is_visible} : p
+      ));
+      
+      toast.success(`Product ${updatedProduct.is_visible ? 'visible' : 'hidden'}`);
     } catch (error) {
       toast.error(handleSupabaseError(error));
       fetchData();
