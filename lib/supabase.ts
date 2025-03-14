@@ -24,7 +24,8 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   global: {
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      'Accept': 'application/vnd.pgrst.object+json',
+      'Prefer': 'return=representation'
     }
   }
 });
